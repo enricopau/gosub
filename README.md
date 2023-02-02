@@ -6,3 +6,4 @@ This project is intended to create a pluggable mailing service for blog subscrip
 ## Uses:
 - https://github.com/mongodb/mongo-go-driver
 - [mongodb](https://www.mongodb.com/)
+- https://github.com/joho/godotenv
