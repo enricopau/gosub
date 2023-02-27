@@ -3,12 +3,16 @@ package database
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 
-	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/joho/godotenv"
 )
 
 // example for documents:
@@ -20,10 +24,19 @@ import (
 // }
 
 type MailEntry struct {
-	ID        primitive.ObjectID
-	Mail      string
-	Token     string
-	Confirmed bool
+	ID           primitive.ObjectID `bson:"_id",omitempty`
+	Mail         string             `bson:"mail",omitempty`
+	Token        string             `bson:"token",omitempty`
+	Confirmed    bool               `bson:"confirmed",omitempty`
+	TimeCreation time.Time          `bson:"timestamp",omitempty`
+}
+
+func (e *MailEntry) Marshal() ([]byte, error) {
+	eBytes, err := bson.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+	return eBytes, nil
 }
 
 const (
@@ -51,7 +64,17 @@ func MailListCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database(dbName).Collection(collectionName)
 }
 
-func AddEntry(entry *MailEntry, coll *mongo.Collection) error {
-	//TODO: add insert
-	return nil
+func CreateTestDataset(n int) (entries []*MailEntry) {
+	r := rand.Intn(99999)
+	for i := 0; i < n; i++ {
+		entry := *&MailEntry{
+			ID:           primitive.NewObjectID(),
+			Mail:         fmt.Sprintf("%d@test.test", r),
+			Token:        "0000",
+			Confirmed:    false,
+			TimeCreation: time.Now(),
+		}
+		entries = append(entries, &entry)
+	}
+	return entries
 }

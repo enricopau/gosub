@@ -5,28 +5,38 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/enricopau/gosub/database"
+	"github.com/enricopau/gosub/server"
 )
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
 	client, err, disconnect := database.Connect()
-	defer disconnect(context.TODO())
+	defer disconnect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	entries, err := database.Confirmed(database.MailListCollection(client))
+
+	mail, err := database.Mail(ctx, "67267@test.test", database.MailListCollection(client))
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, entry := range entries {
-		fmt.Printf("Mail: %v", entry.Mail)
+	fmt.Println(mail)
+
+	glue, err := server.New()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// http.HandleFunc("/", Server)
-	// http.ListenAndServe(":8080", nil)
-}
+	srv := &http.Server{
+		Handler:      glue.Router,
+		Addr:         "127.0.0.1:8000",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 
-func Server(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello")
 }
