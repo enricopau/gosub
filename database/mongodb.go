@@ -50,9 +50,9 @@ func (e *MailEntry) Marshal() ([]byte, error) {
 	return eBytes, nil
 }
 
-const (
-	dbName         = "gosub"
-	collectionName = "maillist"
+var (
+	dbName         = os.Getenv("MONGODB_DBNAME")
+	collectionName = os.Getenv("MONGODB_COLLNAME")
 )
 
 // Connect reads the URI string from the given .env file or other environment variables and connects to the mongodb client.
