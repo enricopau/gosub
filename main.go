@@ -2,16 +2,21 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/enricopau/gosub/database"
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-	defer cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	go shutdown(cancel)
+
 	go checkRemoveableMails(ctx)
 	<-ctx.Done()
+
 	// g := server.NewGlue(ctx, "127.0.0.1:8000")
 	// g.StartServer()
 }
@@ -39,4 +44,12 @@ func removeAfter(ctx context.Context) error {
 	}
 	err = database.DeleteUnconfirmedEntriesAfter(ctx, time.Now().Add(-12*time.Hour), database.MailListCollection(client))
 	return err
+}
+
+func shutdown(cancel context.CancelFunc) {
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, os.Interrupt)
+	<-exit
+	fmt.Println("shutting down")
+	cancel()
 }
