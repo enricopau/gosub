@@ -21,6 +21,7 @@ func main() {
 	// g.StartServer()
 }
 
+// checkRemoveableMails checks for mails that are "unconfirmed" for 24 hours and deletes them automatically.
 func checkRemoveableMails(ctx context.Context) {
 	// make this like 10 hours in PROD
 	t := time.NewTicker(12 * time.Second)
@@ -42,7 +43,7 @@ func removeAfter(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = database.DeleteUnconfirmedEntriesAfter(ctx, time.Now().Add(-12*time.Hour), database.MailListCollection(client))
+	err = database.DeleteUnconfirmedEntriesAfter(ctx, time.Now().Add(-24*time.Hour), database.MailListCollection(client))
 	return err
 }
 
