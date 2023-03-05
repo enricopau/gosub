@@ -34,6 +34,7 @@ func (g *Glue) StartServer() {
 	g.srv.ListenAndServe()
 }
 
+// RequestToken generates a new unconfirmed MailEntry and with a new token.
 func RequestToken(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
