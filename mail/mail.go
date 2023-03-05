@@ -8,7 +8,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func SendMail(mail string, generateMsg func() []byte) error {
+// SendMail sends a mail to the recipients address.
+func SendMail(recipientAddr string, generateMsg func() []byte) error {
 	err := godotenv.Load()
 	if err != nil {
 		return err
@@ -16,7 +17,7 @@ func SendMail(mail string, generateMsg func() []byte) error {
 	mailServerAddr := os.Getenv("MAILSERVER_ADDR")
 	senderAddr := os.Getenv("SENDER_ADDR")
 	auth := smtp.CRAMMD5Auth(os.Getenv("MAILBOX_USER"), os.Getenv("MAILBOX_PW"))
-	return smtp.SendMail(mailServerAddr, auth, senderAddr, []string{mail}, generateMsg())
+	return smtp.SendMail(mailServerAddr, auth, senderAddr, []string{recipientAddr}, generateMsg())
 }
 
 func generateMsg(recipient, subject, verificationLink string) []byte {
@@ -26,4 +27,8 @@ func generateMsg(recipient, subject, verificationLink string) []byte {
 		fmt.Sprintf("Please confirm your email address by clicking the link below.\r\n") +
 		fmt.Sprintf("%s\r\n", verificationLink))
 	return msg
+}
+
+func generateVerificationLink(token string) string {
+	return ""
 }
